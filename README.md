@@ -1,96 +1,41 @@
-# Examen Práctico: Control de Sala
+# Taller Práctico: Sistema de Control Básico en C Puro (STM32L476RG)
 
-**Curso:** 4100901 - Estructuras Computacionales
+**Universidad Nacional de Colombia - Sede Manizales**
+**Curso:** Estructuras Computacionales (4100901)
 
-**Condiciones:** Supervisado, con acceso al código fuente y a internet (sin uso de IA)
+## Introducción
 
----
+Este taller tiene como objetivo principal consolidar los conocimientos adquiridos en los capítulos previos sobre la arquitectura del STM32L476RG y el manejo de sus periféricos mediante programación en C puro, accediendo directamente a los registros de hardware.
 
-## ✅ Parte 2: Actividades Técnicas a Realizar (100 minutos)
+Replicaremos la funcionalidad del "Sistema de Control Básico" implementado en la práctica introductoria (que utilizaba HAL y STM32CubeMX), pero esta vez, construiremos cada módulo desde cero, basándonos en las implementaciones realizadas en los talleres de SysTick, GPIO, EXTI, TIM/PWM y UART.
 
-### 1. Control automático de iluminación \[20%]
+**Objetivo General:**
+Implementar un sistema embebido que gestione LEDs, lea un botón, controle un LED con PWM y se comunique vía UART, utilizando únicamente acceso directo a registros en C puro.
 
-Al presionar el botón B1, la lámpara debe encenderse al 100%. Luego de 10 segundos, debe volver al brillo anterior configurado por UART.
+**Funcionalidades a Implementar:**
+1.  **Heartbeat LED:** Parpadeo del LED integrado (LD2) como señal de actividad del sistema.
+2.  **Control de LED Externo por Botón:**
+    *   Detectar la pulsación del botón de usuario (B1) mediante interrupción externa (EXTI).
+    *   Encender un LED externo durante 3 segundos tras la pulsación.
+3.  **Comunicación UART:**
+    *   Enviar mensajes al PC para indicar eventos (pulsación de botón, timeout del LED).
+    *   Implementar el procesamiento de los caracteres recibidos desde el PC como comandos.
+4.  **Control PWM de LED Externo:**
+    *   Generar una señal PWM utilizando TIM3_CH1 para controlar la intensidad de un segundo LED externo.
 
-Recomendaciones:
+## Estructura de la Guía
 
-* Use `systick_get_tick()` para manejar los tiempos.
-* Guarde el valor anterior del PWM para restaurarlo.
+Esta guía está dividida en varias secciones para facilitar el proceso de desarrollo:
 
----
+1.  **[Configuración del Entorno (Doc/SETUP.md)](Doc/SETUP.md):** Preparación del hardware y el entorno de desarrollo.
+2.  **[Módulo RCC (Doc/RCC.md)](Doc/RCC.md):** Configuración del sistema de reloj.
+3.  **[Módulo SysTick (Doc/SYSTICK.md)](Doc/SYSTICK.md):** Configuración del temporizador del sistema para manejo del tiempo.
+4.  **[Módulo GPIO (Doc/GPIO.md)](Doc/GPIO.md):** Configuración y manejo de pines de entrada/salida.
+5.  **[Módulo UART (Doc/UART.md)](Doc/UART.md):** Implementación de comunicación serial.
+6.  **[Módulo TIM/PWM (Doc/TIM.md)](Doc/TIM.md):** Generación de señales PWM.
+7.  **[Módulo NVIC (Doc/NVIC.md)](Doc/NVIC.md):** Configuración de interrupciones.
+8.  **[Lógica de Control (Doc/ROOM_CONTROL.md)](Doc/ROOM_CONTROL.md):** Integración de la lógica de la aplicación.
+9. **[Función Principal (Doc/MAIN.md)](Doc/MAIN.md):** Estructura del archivo `main.c`.
+10. **[Manual de Usuario (Doc/USER_MANUAL.md)](Doc/USER_MANUAL.md):** Funciones y arquitectura del sistema.
 
-### 2. Activar bit de paridad UART \[10%]
-
-Modifique la configuración de la UART para que se active el **bit de paridad impar (odd parity)**, de modo que el sistema sea más confiable en ambientes ruidosos como instalaciones industriales.
-
-Recomendaciones:
-
-* Consulte la documentación del registro `CR1` de USART2.
-* Verifique que la comunicación serial con la terminal funcione correctamente con la nueva configuración.
-
----
-
-### 3. Remapeo del pin PWM a PB4 \[10%]
-
-Actualmente la lámpara usa PA6 para la salida PWM (TIM3\_CH1).
-
-Reemplace esta configuración para usar **PB4** (que también puede usar TIM3\_CH1) como nuevo pin de salida PWM.
-
-Recomendaciones:
-
-* Verifique el AF de PB4 en el manual de referencia.
-* Actualice la configuración en `gpio.h`, `gpio.c`, y `tim.c`.
-
----
-
-### 4. Mensaje de bienvenida \[10%]
-
-Al iniciar el sistema, se debe imprimir vía UART:
-
-```
-Controlador de Sala v1.0
-Desarrollador: [Nombre del estudiante]
-Estado inicial:
- - Lámpara: 20%
- - Puerta: Cerrada
-```
-
-Debe colocarse en `room_control_app_init()`.
-
----
-
-### 5. Comando UART para ver estado actual \[10%]
-
-Implemente el comando `'s'` para que por UART se imprima:
-
-```
-Estado:
- - Lámpara: 70%
- - Puerta: Abierta
-```
-
-Este debe reflejar el estado real de las variables del sistema.
-
----
-
-### 6. Comando de ayuda UART \[10%]
-
-Implemente el comando `'?'` para que al enviarlo vía UART se muestre un resumen de uso del sistema. Ejemplo:
-
-```
-Comandos disponibles:
- '1'-'4': Ajustar brillo lámpara (100%, 70%, 50%, 20%)
- '0'   : Apagar lámpara
- 'o'   : Abrir puerta
- 'c'   : Cerrar puerta
- 's'   : Estado del sistema
- '?'   : Ayuda
-```
-
----
-
-### 7. Transición gradual de brillo \[10%]
-
-Implemente el comando `'g'` para hacer que la lámpara aumente gradualmente de 0% a 100% en pasos de 10% cada 500ms.
-
----
+¡Manos a la obra! Comienza por revisar la [Configuración del Entorno (Doc/SETUP.md)](Doc/SETUP.md).
